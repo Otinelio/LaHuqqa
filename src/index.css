@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 38% 5%;
+    --foreground: 36 38% 87%;
+
+    --card: 24 40% 8%;
+    --card-foreground: 36 38% 87%;
+
+    --popover: 30 38% 5%;
+    --popover-foreground: 36 38% 87%;
+
+    --primary: 38 87% 41%;
+    --primary-foreground: 30 38% 5%;
+
+    --secondary: 24 50% 24%;
+    --secondary-foreground: 36 38% 87%;
+
+    --muted: 24 30% 15%;
+    --muted-foreground: 36 20% 60%;
+
+    --accent: 38 87% 41%;
+    --accent-foreground: 30 38% 5%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 24 30% 18%;
+    --input: 24 30% 18%;
+    --ring: 38 87% 41%;
+
+    --radius: 0.25rem;
+
+    --sidebar-background: 30 38% 5%;
+    --sidebar-foreground: 36 38% 87%;
+    --sidebar-primary: 38 87% 41%;
+    --sidebar-primary-foreground: 30 38% 5%;
+    --sidebar-accent: 24 50% 24%;
+    --sidebar-accent-foreground: 36 38% 87%;
+    --sidebar-border: 24 30% 18%;
+    --sidebar-ring: 38 87% 41%;
+
+    --ivory: 40 43% 93%;
+    --earth: 24 50% 24%;
+    --footer-bg: 30 55% 3%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "DM Sans", sans-serif;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Cormorant Garamond", serif;
+  }
+
+  img {
+    filter: contrast(1.05) brightness(0.97) saturate(1.08);
+    transition: filter 400ms ease;
+  }
+
+  img:hover {
+    filter: contrast(1.08) brightness(1.05) saturate(1.15);
+  }
+}
+
+@keyframes section-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stretch-line {
+  from {
+    width: 0;
+  }
+  to {
+    width: 120px;
+  }
+}
+
+@keyframes loading-letter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stretch-underline {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes whatsapp-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes whatsapp-bounce-in {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: "Cormorant Garamond", serif;
+  }
+
+  .font-body {
+    font-family: "DM Sans", sans-serif;
+  }
+
+  .label-text {
+    @apply font-body text-xs font-medium uppercase tracking-[0.1em];
+  }
+
+  .cta-text {
+    @apply font-body text-sm font-semibold uppercase tracking-[0.08em];
+  }
+
+  .section-enter {
+    animation: section-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .line-stretch {
+    animation: stretch-line 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .whatsapp-pulse-loop {
+    animation: whatsapp-pulse 600ms ease-in-out 4s infinite;
+  }
+}
