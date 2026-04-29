@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/LogoLahuQQa.png";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const navLinks = [
   { to: "/", label: "Accueil" },
@@ -10,13 +11,12 @@ const navLinks = [
   { to: "/contact", label: "Contact" },
 ];
 
-const waOrder =
-  "https://wa.me/22896949494?text=Bonjour%2C+je+souhaite+passer+une+commande+%3A";
-
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { whatsapp } = useSettings();
+  const waOrder = `https://wa.me/${whatsapp}?text=Bonjour%2C+je+souhaite+passer+une+commande+%3A`;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);

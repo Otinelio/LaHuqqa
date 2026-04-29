@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { MessageCircle } from "lucide-react";
-
-const waOrder =
-  "https://wa.me/22896949494?text=Bonjour%2C+je+souhaite+passer+une+commande+%3A";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const WhatsAppButton = () => {
+  const { whatsapp } = useSettings();
+  const waOrder = `https://wa.me/${whatsapp}?text=Bonjour%2C+je+souhaite+passer+une+commande+%3A`;
+
   const [entered, setEntered] = useState(false);
   const [pulse, setPulse] = useState(false);
 

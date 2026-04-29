@@ -6,11 +6,12 @@ import interieur from "@/assets/interieur.jpg";
 import terrasse from "@/assets/terrasse.jpg";
 import cocktail from "@/assets/cocktail.jpg";
 import amisDiner from "@/assets/amis-diner.jpg";
-
-const waEvent =
-  "https://wa.me/22896949494?text=Bonjour%2C+je+souhaite+organiser+un+%C3%A9v%C3%A9nement+%3A";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const Index = () => {
+  const { whatsapp, tagline, address, name } = useSettings();
+  const waEvent = `https://wa.me/${whatsapp}?text=Bonjour%2C+je+souhaite+organiser+un+%C3%A9v%C3%A9nement+%3A`;
+
   return (
     <main>
       <section className="relative flex h-screen items-center justify-center overflow-hidden">
@@ -24,9 +25,9 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 to-background/85" />
         <div className="relative z-10 max-w-4xl px-6 text-center">
           <h1 className="font-display text-5xl font-light italic leading-[1.05] text-foreground md:text-[88px]">
-            Une expérience au goût unique.
+            {tagline}
           </h1>
-          <p className="font-body mt-6 text-base text-foreground/80">Tokoin Wuiti · Lomé, Togo</p>
+          <p className="font-body mt-6 text-base text-foreground/80">{address}</p>
           <Link
             to="/menu"
             className="cta-text mt-10 inline-block border border-foreground/40 px-8 py-3 text-foreground transition-all duration-200 hover:border-primary hover:text-primary active:scale-[0.97]"
@@ -41,13 +42,13 @@ const Index = () => {
           <ScrollReveal>
             <p className="label-text mb-6 text-primary">L&apos;esprit du lieu</p>
             <p className="mb-5 text-base leading-[1.7] text-foreground/80">
-              La HuQQa est née d&apos;une envie simple : créer un espace où l&apos;on se sent bien. Un lieu où la cuisine locale togolaise rencontre les saveurs internationales, où chaque plat est une invitation au voyage, et où le cadre transforme un repas en un moment précieux.
+              {name} est née d&apos;une envie simple : créer un espace où l&apos;on se sent bien. Un lieu où la cuisine locale togolaise rencontre les saveurs internationales, où chaque plat est une invitation au voyage, et où le cadre transforme un repas en un moment précieux.
             </p>
             <p className="mb-5 text-base leading-[1.7] text-foreground/80">
-              Des cocktails construits avec soin, une terrasse baignée de lumières dorées, un intérieur feutré qui invite à la conversation — ici, tout est pensé pour que l&apos;instant dure. Que vous soyez en tête-à-tête ou entre amis, La HuQQa s&apos;adapte.
+              Des cocktails construits avec soin, une terrasse baignée de lumières dorées, un intérieur feutré qui invite à la conversation — ici, tout est pensé pour que l&apos;instant dure. Que vous soyez en tête-à-tête ou entre amis, {name} s&apos;adapte.
             </p>
             <p className="text-base leading-[1.7] text-foreground/80">
-              C&apos;est aussi le lieu de vos événements : anniversaires, réceptions privées, soirées d&apos;entreprise. Chaque occasion trouve son écrin au cœur de Tokoin Wuiti.
+              C&apos;est aussi le lieu de vos événements : anniversaires, réceptions privées, soirées d&apos;entreprise. Chaque occasion trouve son écrin au cœur de {address}.
             </p>
           </ScrollReveal>
           <ScrollReveal delay={100} className="w-full">

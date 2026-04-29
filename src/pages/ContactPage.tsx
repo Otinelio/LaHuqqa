@@ -1,11 +1,10 @@
 import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
-import TypewriterAddress from "@/components/TypewriterAddress";
-
-const waReserve =
-  "https://wa.me/22896949494?text=Bonjour%2C+je+souhaite+faire+une+r%C3%A9servation+%3A";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const ContactPage = () => {
+  const { whatsapp, address, phone, email, hours, instagram, facebook } = useSettings();
+  const waReserve = `https://wa.me/${whatsapp}?text=Bonjour%2C+je+souhaite+faire+une+r%C3%A9servation+%3A`;
   return (
     <main>
       <div className="pt-[72px]">
@@ -21,15 +20,15 @@ const ContactPage = () => {
               <MapPin className="mt-1 size-5 shrink-0 text-primary" aria-hidden />
               <div>
                 <p className="label-text mb-1 text-muted-foreground">Adresse</p>
-                <TypewriterAddress />
+                <p className="text-foreground/80">{address}</p>
               </div>
             </div>
             <div className="flex gap-4">
               <Phone className="mt-1 size-5 shrink-0 text-primary" aria-hidden />
               <div>
                 <p className="label-text mb-1 text-muted-foreground">Téléphone</p>
-                <a href="tel:+22896949494" className="text-foreground transition-colors hover:text-primary">
-                  (+228) 96 94 94 94
+                <a href={`tel:+${whatsapp}`} className="text-foreground transition-colors hover:text-primary">
+                  (+228) {whatsapp.replace("228", "").match(/.{1,2}/g)?.join(" ") || whatsapp}
                 </a>
               </div>
             </div>
@@ -38,10 +37,10 @@ const ContactPage = () => {
               <div>
                 <p className="label-text mb-1 text-muted-foreground">Email</p>
                 <a
-                  href="mailto:lahuqqatogo@gmail.com"
+                  href={`mailto:${email}`}
                   className="text-foreground transition-colors hover:text-primary"
                 >
-                  lahuqqatogo@gmail.com
+                  {email}
                 </a>
               </div>
             </div>
@@ -49,12 +48,12 @@ const ContactPage = () => {
               <Clock className="mt-1 size-5 shrink-0 text-primary" aria-hidden />
               <div>
                 <p className="label-text mb-1 text-muted-foreground">Horaires</p>
-                <p className="text-foreground/80">Lundi – Dimanche · 11h30 – 00h00</p>
+                <p className="text-foreground/80">{hours}</p>
               </div>
             </div>
             <div className="flex gap-4 pt-4">
               <a
-                href="https://www.instagram.com/la.huqqa/"
+                href={`https://${instagram}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="label-text text-foreground/60 transition-colors hover:text-primary"
@@ -62,7 +61,7 @@ const ContactPage = () => {
                 Instagram
               </a>
               <a
-                href="https://www.facebook.com/LahuQQa"
+                href={`https://${facebook}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="label-text text-foreground/60 transition-colors hover:text-primary"

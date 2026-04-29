@@ -5,10 +5,12 @@ import cocktail from "@/assets/cocktail.jpg";
 import amisDiner from "@/assets/amis-diner.jpg";
 import barCounter from "@/assets/bar-counter.jpg";
 import heroHome from "@/assets/hero-home.jpg";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const photos = [interieur, terrasse, cocktail, amisDiner, barCounter, interieur];
 
 const AmbiancePage = () => {
+  const { name } = useSettings();
   return (
     <main>
       <div className="pt-[72px]">
@@ -34,7 +36,7 @@ const AmbiancePage = () => {
       <section className="bg-secondary py-20">
         <ScrollReveal className="mx-auto max-w-[720px] px-6">
           <p className="font-display text-xl font-light italic leading-[1.7] text-foreground md:text-[22px]">
-            Pousser la porte de La HuQQa, c&apos;est entrer dans un monde à part. Un lieu où le temps ralentit, où la lumière dorée des bougies dessine des ombres douces sur les tables en bois, où chaque détail — du verre posé devant vous au murmure de la musique — a été pensé pour créer un instant de grâce.
+            Pousser la porte de {name}, c&apos;est entrer dans un monde à part. Un lieu où le temps ralentit, où la lumière dorée des bougies dessine des ombres douces sur les tables en bois, où chaque détail — du verre posé devant vous au murmure de la musique — a été pensé pour créer un instant de grâce.
           </p>
           <p className="font-display mt-8 text-xl font-light italic leading-[1.7] text-foreground md:text-[22px]">
             Dehors, la terrasse respire sous les étoiles de Lomé. Les plantes tropicales entourent l&apos;espace comme un jardin secret, et les guirlandes lumineuses transforment chaque soirée en fête. Ici, on vient seul·e, entre amis ou en famille — et on repart toujours avec le sourire.
