@@ -17,18 +17,21 @@ function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 }
 
-function playBeep() {
+function playBeepOnce() {
   try {
     const ctx = new AudioContext();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = "sine";
     osc.frequency.value = 880;
-    gain.gain.value = 0.3;
+    gain.gain.value = 0.4;
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.2);
+    // Two-tone beep: high then low
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(660, ctx.currentTime + 0.15);
+    osc.stop(ctx.currentTime + 0.3);
   } catch { /* audio not available */ }
 }
 
@@ -134,6 +137,31 @@ const CuisinePage = () => {
   const [connected, setConnected] = useState(true);
   const [clock, setClock] = useState(new Date());
   const initRef = useRef(false);
+  const alarmIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Continuous alarm: beep every 2s while there are pending orders
+  useEffect(() => {
+    if (pending.length > 0) {
+      // Play immediately on first pending
+      playBeepOnce();
+      // Then loop every 2 seconds
+      alarmIntervalRef.current = setInterval(() => {
+        playBeepOnce();
+      }, 2000);
+    } else {
+      // No pending orders — stop alarm
+      if (alarmIntervalRef.current) {
+        clearInterval(alarmIntervalRef.current);
+        alarmIntervalRef.current = null;
+      }
+    }
+    return () => {
+      if (alarmIntervalRef.current) {
+        clearInterval(alarmIntervalRef.current);
+        alarmIntervalRef.current = null;
+      }
+    };
+  }, [pending.length]);
 
   // Live clock
   useEffect(() => {
@@ -165,7 +193,7 @@ const CuisinePage = () => {
         onInsert: (o) => {
           if (o.status === "pending") {
             setPending((p) => [...p, o]);
-            playBeep();
+            // Alarm loop is handled by the useEffect watching pending.length
             toast(`Nouvelle commande · Table ${o.table_number}`, {
               duration: 5000,
               style: { background: "#F97316", color: "#fff", border: "none" },
