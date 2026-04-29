@@ -381,10 +381,10 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
               <p className="label-text mb-2 text-primary">{cat.label}</p>
               <div className="mb-10 h-[1px] bg-border" />
             </ScrollReveal>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3 md:gap-6 md:grid-cols-3 lg:grid-cols-4">
               {cat.dishes.map((dish, di) => (
                 <ScrollReveal key={`${cat.id}-${dish.name}`} delay={di * 80}>
-                  <article className="group overflow-hidden rounded bg-card">
+                  <article className="group flex h-full flex-col overflow-hidden rounded bg-card shadow-sm">
                     <div className="overflow-hidden">
                       <img
                         src={dish.image}
@@ -394,16 +394,17 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
                         style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
                       />
                     </div>
-                    <div className="p-5">
-                      <h3 className="font-display text-2xl text-foreground">{dish.name}</h3>
-                      <p className="mt-1 line-clamp-2 text-sm text-foreground/60">{dish.description}</p>
-                      <div className="mt-4 flex items-center justify-between">
-                        <span className="font-body text-base font-bold text-primary">{dish.price}</span>
+                    <div className="flex flex-1 flex-col p-3 md:p-5">
+                      <h3 className="font-display text-[15px] leading-tight text-foreground md:text-xl lg:text-2xl">{dish.name}</h3>
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-foreground/60 md:text-sm">{dish.description}</p>
+                      
+                      <div className="mt-auto pt-4 flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
+                        <span className="font-body text-sm font-bold text-primary md:text-base">{dish.price}</span>
                         {scanMode ? (
                           <button
                             type="button"
                             onClick={() => addToCart(dish)}
-                            className="cta-text inline-flex items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 text-[12px] text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            className="cta-text flex w-full items-center justify-center gap-1 rounded-full border border-primary px-3 py-1.5 text-[11px] text-primary transition-colors hover:bg-primary hover:text-primary-foreground xl:w-auto md:text-[12px]"
                           >
                             <Plus size={14} />
                             Ajouter
@@ -413,7 +414,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
                             href={`${waBase}${encodeURIComponent(dish.name)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="cta-text inline-flex items-center gap-1.5 text-[12px] text-primary hover:underline"
+                            className="cta-text flex w-full items-center justify-center gap-1 rounded-full border border-primary px-3 py-1.5 text-[11px] text-primary transition-colors hover:bg-primary hover:text-primary-foreground xl:w-auto md:text-[12px]"
                           >
                             <MessageCircle size={14} />
                             Commander
