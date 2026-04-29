@@ -364,10 +364,10 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         </section>
       </div>
 
-      {/* Sticky category pills */}
+      {/* Fixed category pills */}
       {!loading && menuCategories.length > 0 && (
         <div
-          className={`sticky ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-sm transition-all duration-300`}
+          className={`fixed left-0 right-0 ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-sm`}
         >
           <div id="category-pills-container" className="no-scrollbar mx-auto flex max-w-6xl gap-2 overflow-x-auto px-6 py-3">
             {menuCategories.map((c) => (
@@ -389,7 +389,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         </div>
       )}
 
-      <div className="mx-auto max-w-6xl px-6 pb-16 pt-8 md:px-12">
+      <div className={`mx-auto max-w-6xl px-6 pb-16 md:px-12 ${scanMode ? "pt-[60px]" : "pt-[108px]"}`}>
         {/* Skeleton loading */}
         {loading && (
           <>
