@@ -103,18 +103,22 @@ const TableModal = ({ onConfirm }: { onConfirm: (n: string) => void }) => {
 const CartDrawer = ({
   cart,
   tableNumber,
+  scanMode,
   onClose,
   onUpdateQty,
   onRemove,
   onSubmit,
+  onWhatsAppOrder,
   submitting,
 }: {
   cart: CartItem[];
   tableNumber: string;
+  scanMode: boolean;
   onClose: () => void;
   onUpdateQty: (name: string, delta: number) => void;
   onRemove: (name: string) => void;
   onSubmit: (note: string) => void;
+  onWhatsAppOrder: (note: string) => void;
   submitting: boolean;
 }) => {
   const [note, setNote] = useState("");
@@ -167,18 +171,29 @@ const CartDrawer = ({
             <span className="font-body text-sm text-foreground/70">Total</span>
             <span className="font-body text-lg font-bold text-primary">{formatPrice(total)}</span>
           </div>
-          <button
-            type="button"
-            onClick={() => onSubmit(note)}
-            disabled={submitting}
-            className="h-[52px] w-full rounded bg-primary font-body text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-90 active:scale-[0.97] disabled:opacity-70"
-          >
-            {submitting ? (
-              <Loader2 size={20} className="mx-auto animate-spin" />
-            ) : (
-              `Commander · Table ${tableNumber}`
-            )}
-          </button>
+          {scanMode ? (
+            <button
+              type="button"
+              onClick={() => onSubmit(note)}
+              disabled={submitting}
+              className="h-[52px] w-full rounded bg-primary font-body text-sm font-semibold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-90 active:scale-[0.97] disabled:opacity-70"
+            >
+              {submitting ? (
+                <Loader2 size={20} className="mx-auto animate-spin" />
+              ) : (
+                `Commander · Table ${tableNumber}`
+              )}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onWhatsAppOrder(note)}
+              className="h-[52px] w-full rounded bg-[#25D366] font-body text-sm font-semibold uppercase tracking-wider text-white transition-opacity hover:opacity-90 active:scale-[0.97] flex items-center justify-center gap-2"
+            >
+              <MessageCircle size={20} />
+              Commander sur WhatsApp
+            </button>
+          )}
         </div>
       </div>
     </>
@@ -344,6 +359,22 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
     setSubmitting(false);
   };
 
+  const handleWhatsAppOrder = (note: string) => {
+    const total = cart.reduce((s, i) => s + i.priceNum * i.qty, 0);
+    const msg = `Bonjour, je souhaite commander :\n\n` +
+      cart.map((i) => `• ${i.qty}x ${i.name} — ${formatPrice(i.priceNum * i.qty)}`).join("\n") +
+      `\n\nTotal : ${formatPrice(total)}` +
+      (note ? `\n\nNote : ${note}` : "");
+    const waUrl = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, "_blank");
+    toast.success("Redirection vers WhatsApp…", {
+      duration: 2000,
+      style: { background: "#25D366", color: "#fff", border: "none" },
+    });
+    setCart([]);
+    setDrawerOpen(false);
+  };
+
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
   const cartTotal = cart.reduce((s, i) => s + i.priceNum * i.qty, 0);
 
@@ -431,26 +462,14 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
                       
                       <div className="mt-auto pt-4 flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
                         <span className="font-body text-sm font-bold text-primary md:text-base">{dish.price}</span>
-                        {scanMode ? (
-                          <button
-                            type="button"
-                            onClick={() => addToCart(dish)}
-                            className="cta-text flex w-full items-center justify-center gap-1 rounded-full border border-primary px-3 py-1.5 text-[11px] text-primary transition-colors hover:bg-primary hover:text-primary-foreground xl:w-auto md:text-[12px]"
-                          >
-                            <Plus size={14} />
-                            Ajouter
-                          </button>
-                        ) : (
-                          <a
-                            href={`${waBase}${encodeURIComponent(dish.name)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="cta-text flex w-full items-center justify-center gap-1 rounded-full border border-primary px-3 py-1.5 text-[11px] text-primary transition-colors hover:bg-primary hover:text-primary-foreground xl:w-auto md:text-[12px]"
-                          >
-                            <MessageCircle size={14} />
-                            Commander
-                          </a>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => addToCart(dish)}
+                          className="cta-text flex w-full items-center justify-center gap-1 rounded-full border border-primary px-3 py-1.5 text-[11px] text-primary transition-colors hover:bg-primary hover:text-primary-foreground xl:w-auto md:text-[12px]"
+                        >
+                          <Plus size={14} />
+                          Ajouter
+                        </button>
                       </div>
                     </div>
                   </article>
@@ -472,32 +491,46 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         <section className="bg-primary py-16">
           <div className="mx-auto max-w-3xl px-6 text-center">
             <h2 className="font-display mb-4 text-3xl text-primary-foreground md:text-4xl">Envie de commander ?</h2>
-            <a href={waOrderFooter} target="_blank" rel="noopener noreferrer"
-              className="cta-text inline-flex items-center gap-2 bg-primary-foreground px-8 py-3 text-primary transition-opacity hover:opacity-90 active:scale-[0.97]">
-              <MessageCircle size={18} />
-              Commander sur WhatsApp
-            </a>
+            <p className="font-body text-sm text-primary-foreground/80 mb-6">Ajoutez vos plats au panier puis validez votre commande sur WhatsApp</p>
+            {cartCount > 0 ? (
+              <button
+                type="button"
+                onClick={() => setDrawerOpen(true)}
+                className="cta-text inline-flex items-center gap-2 bg-primary-foreground px-8 py-3 text-primary transition-opacity hover:opacity-90 active:scale-[0.97] rounded"
+              >
+                <ShoppingBag size={18} />
+                Voir mon panier · {cartCount} article{cartCount > 1 ? "s" : ""}
+              </button>
+            ) : (
+              <a href={waOrderFooter} target="_blank" rel="noopener noreferrer"
+                className="cta-text inline-flex items-center gap-2 bg-primary-foreground px-8 py-3 text-primary transition-opacity hover:opacity-90 active:scale-[0.97] rounded">
+                <MessageCircle size={18} />
+                Commander sur WhatsApp
+              </a>
+            )}
           </div>
         </section>
       )}
 
-      {scanMode && cartCount > 0 && (
+      {cartCount > 0 && (
         <button type="button" onClick={() => setDrawerOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-primary px-5 py-3 font-body text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-[1.03] active:scale-[0.97]">
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full px-5 py-3 font-body text-sm font-semibold shadow-lg transition-transform hover:scale-[1.03] active:scale-[0.97] ${scanMode ? 'bg-primary text-primary-foreground' : 'bg-[#25D366] text-white'}`}>
           <ShoppingBag size={20} />
           Panier · {cartCount}
           <span className="ml-1 text-xs opacity-80">{formatPrice(cartTotal)}</span>
         </button>
       )}
 
-      {scanMode && drawerOpen && (
+      {drawerOpen && (
         <CartDrawer
           cart={cart}
           tableNumber={tableNumber}
+          scanMode={scanMode}
           onClose={() => setDrawerOpen(false)}
           onUpdateQty={updateQty}
           onRemove={removeFromCart}
           onSubmit={handleSubmitOrder}
+          onWhatsAppOrder={handleWhatsAppOrder}
           submitting={submitting}
         />
       )}

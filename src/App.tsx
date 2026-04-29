@@ -18,16 +18,18 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 const HIDE_CHROME = ["/admin", "/cuisine", "/menu/scan"];
+const HIDE_WHATSAPP_BTN = [...HIDE_CHROME, "/menu"];
 
 const PublicChrome = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
-  const hide = HIDE_CHROME.some((p) => location.pathname.startsWith(p));
+  const hideChrome = HIDE_CHROME.some((p) => location.pathname === p || location.pathname.startsWith(`${p}/`));
+  const hideWhatsApp = HIDE_WHATSAPP_BTN.some((p) => location.pathname === p || location.pathname.startsWith(`${p}/`));
   return (
     <>
-      {!hide && <Navbar />}
+      {!hideChrome && <Navbar />}
       {children}
-      {!hide && <Footer />}
-      {!hide && <WhatsAppButton />}
+      {!hideChrome && <Footer />}
+      {!hideWhatsApp && <WhatsAppButton />}
     </>
   );
 };

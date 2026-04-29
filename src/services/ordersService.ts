@@ -84,9 +84,11 @@ export async function getRecentDoneOrders(
 export function subscribeToOrders({
   onInsert,
   onUpdate,
+  onStatusChange,
 }: {
   onInsert?: (order: Order) => void;
   onUpdate?: (order: Order) => void;
+  onStatusChange?: (status: string) => void;
 }): () => void {
   const channel = supabase
     .channel("orders-realtime")
@@ -94,6 +96,7 @@ export function subscribeToOrders({
       "postgres_changes",
       { event: "INSERT", schema: "public", table: "orders" },
       (payload) => {
+        console.log("[OrdersRealtime] INSERT received:", payload.new);
         onInsert?.(payload.new as Order);
       }
     )
@@ -101,10 +104,14 @@ export function subscribeToOrders({
       "postgres_changes",
       { event: "UPDATE", schema: "public", table: "orders" },
       (payload) => {
+        console.log("[OrdersRealtime] UPDATE received:", payload.new);
         onUpdate?.(payload.new as Order);
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      console.log("[OrdersRealtime] subscription status:", status, err ?? "");
+      onStatusChange?.(status);
+    });
 
   return () => {
     supabase.removeChannel(channel);
