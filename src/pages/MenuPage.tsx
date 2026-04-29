@@ -191,7 +191,6 @@ interface MenuPageProps {
 }
 
 const MenuPage = ({ scanMode = false }: MenuPageProps) => {
-  const [stickyVisible, setStickyVisible] = useState(false);
   const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string>("");
@@ -242,13 +241,46 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setStickyVisible(window.scrollY > 200);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    const handleScroll = () => {
+      let currentActiveId = "";
+      const offset = scanMode ? 180 : 240; // Adjust offset based on sticky header heights
+
+      for (const cat of menuCategories) {
+        const el = document.getElementById(cat.id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= offset) {
+            currentActiveId = cat.id;
+          }
+        }
+      }
+
+      if (currentActiveId) {
+        setActiveId(currentActiveId);
+      } else if (menuCategories.length > 0) {
+        setActiveId(menuCategories[0].id);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [menuCategories, scanMode]);
+
+  // Scroll active pill into view
+  useEffect(() => {
+    if (activeId) {
+      const btn = document.getElementById(`pill-${activeId}`);
+      const container = document.getElementById("category-pills-container");
+      if (btn && container) {
+        const scrollLeft = btn.offsetLeft - container.clientWidth / 2 + btn.clientWidth / 2;
+        container.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      }
+    }
+  }, [activeId]);
 
   const scrollToId = (id: string) => {
+    setActiveId(id);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -332,19 +364,18 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         </section>
       </div>
 
-      {/* Sticky pills */}
+      {/* Sticky category pills */}
       {!loading && menuCategories.length > 0 && (
         <div
-          className={`sticky ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-sm transition-all duration-300 ${
-            stickyVisible ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
-          }`}
+          className={`sticky ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-sm transition-all duration-300`}
         >
-          <div className="no-scrollbar mx-auto flex max-w-6xl gap-2 overflow-x-auto px-6 py-3">
+          <div id="category-pills-container" className="no-scrollbar mx-auto flex max-w-6xl gap-2 overflow-x-auto px-6 py-3">
             {menuCategories.map((c) => (
               <button
                 key={c.id}
+                id={`pill-${c.id}`}
                 type="button"
-                onClick={() => { setActiveId(c.id); scrollToId(c.id); }}
+                onClick={() => scrollToId(c.id)}
                 className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
                   activeId === c.id
                     ? "bg-primary text-primary-foreground"
