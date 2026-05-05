@@ -366,7 +366,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         })).filter((cat: MenuCategory) => cat.dishes.length > 0);
 
         setMenuCategories(grouped);
-        if (grouped.length > 0) setActiveId(grouped[0].id);
+        if (grouped.length > 0) setActiveId("all");
       } catch {
         // Supabase error — empty menu
         setMenuCategories([]);
@@ -394,8 +394,13 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
   const handleTabClick = (id: string) => {
     setSearch("");
     setActiveId(id);
-    const offset = scanMode ? 110 : 160;
-    window.scrollTo({ top: offset, behavior: "smooth" });
+    const header = document.getElementById("menu-sticky-header");
+    if (header) {
+      const topPos = header.offsetTop - (scanMode ? 0 : 72);
+      if (window.scrollY > topPos) {
+        window.scrollTo({ top: topPos, behavior: "smooth" });
+      }
+    }
   };
 
   const handleTableConfirm = (n: string) => {
@@ -497,7 +502,8 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
       {/* Fixed header: Search + category pills */}
       {!loading && menuCategories.length > 0 && (
         <div
-          className={`fixed left-0 right-0 ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-md shadow-sm`}
+          id="menu-sticky-header"
+          className={`sticky ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-md shadow-sm`}
         >
           <div className="mx-auto max-w-6xl px-6 pt-4 pb-2">
             <div className="relative">
@@ -520,6 +526,18 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
             </div>
           </div>
           <div id="category-pills-container" className="no-scrollbar mx-auto flex max-w-6xl gap-2 overflow-x-auto px-6 py-2 pb-3">
+            <button
+              id={`pill-all`}
+              type="button"
+              onClick={() => handleTabClick("all")}
+              className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
+                activeId === "all"
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
+              }`}
+            >
+              Tout
+            </button>
             {menuCategories.map((c) => {
               const count = c.dishes.filter(d => 
                 d.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -547,7 +565,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         </div>
       )}
 
-      <div className={`mx-auto max-w-6xl px-6 pb-16 md:px-12 ${scanMode ? "pt-[110px]" : "pt-[160px]"}`}>
+      <div className={`mx-auto max-w-6xl px-6 pb-16 md:px-12 pt-8`}>
         {/* Skeleton loading */}
         {loading && (
           <>
@@ -565,8 +583,8 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
 
         {/* Real content */}
         {!loading && menuCategories.map((cat) => {
-          // In tabbed view, only render the active category unless searching
-          if (!search && cat.id !== activeId) return null;
+          // In tabbed view, only render the active category unless searching or "all" is selected
+          if (!search && activeId !== "all" && cat.id !== activeId) return null;
 
           const filteredDishes = cat.dishes.filter(dish => 
             dish.name.toLowerCase().includes(search.toLowerCase()) || 

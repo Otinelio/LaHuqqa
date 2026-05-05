@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import imageCompression from "browser-image-compression";
 
 // ── Types ──────────────────────────────────────────────
 export interface RestaurantSettings {
@@ -192,13 +193,23 @@ export async function toggleAvailable(id: string, val: boolean): Promise<void> {
 
 // ── Storage ────────────────────────────────────────────
 export async function uploadImage(file: File): Promise<string> {
-  const fileExt = file.name.split('.').pop();
+  const fileExt = "webp"; // We will compress it to webp
   const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
   const filePath = `${fileName}`;
 
+  // Compress image
+  const options = {
+    maxSizeMB: 0.15, // max 150 KB
+    maxWidthOrHeight: 800, // 800px max width/height
+    useWebWorker: true,
+    fileType: "image/webp",
+  };
+  
+  const compressedFile = await imageCompression(file, options);
+
   const { error: uploadError } = await supabase.storage
     .from('images')
-    .upload(filePath, file);
+    .upload(filePath, compressedFile);
 
   if (uploadError) throw uploadError;
 
