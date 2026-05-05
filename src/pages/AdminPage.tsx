@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   LogOut, Pencil, Trash2, Check, X, ChevronUp, ChevronDown,
-  Plus, Save, Clock, Hash, Loader2,
+  Plus, Save, Clock, Hash, Loader2, Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -63,6 +63,7 @@ const MenuTab = ({ cats, items, reload }: {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [delConfirm, setDelConfirm] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState("");
 
   const save = async () => {
     if (!form.name || !form.price) return;
@@ -100,46 +101,84 @@ const MenuTab = ({ cats, items, reload }: {
     catch { toast.error("Erreur de suppression"); }
   };
 
+  const filteredItems = items.filter(item => 
+    item.name.toLowerCase().includes(search.toLowerCase()) || 
+    (item.description && item.description.toLowerCase().includes(search.toLowerCase()))
+  );
+
   return (
     <div>
+      <div className="mb-6 flex gap-4">
+        <div className="relative flex-1">
+          <input 
+            type="text" 
+            placeholder="Rechercher un plat par nom ou description..." 
+            value={search} 
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-12 w-full rounded-xl border border-gray-200 pl-11 pr-4 text-sm text-gray-900 bg-white outline-none focus:border-gray-400 focus:ring-4 focus:ring-gray-100 transition-all shadow-sm"
+          />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        </div>
+        {!adding && (
+          <button type="button" onClick={() => { setForm({ name: "", description: "", price: "", category_id: cats[0]?.id || "", image_url: "" }); setImageFile(null); setAdding(true); }}
+            className="flex items-center gap-2 rounded-xl bg-[#1A1208] px-5 text-sm font-semibold uppercase tracking-wider text-white hover:bg-black transition-colors shadow-sm">
+            <Plus size={18} /> Ajouter un plat
+          </button>
+        )}
+      </div>
+
       {cats.map((cat) => {
-        const catItems = items.filter((i) => i.category_id === cat.id);
+        const catItems = filteredItems.filter((i) => i.category_id === cat.id);
         if (catItems.length === 0) return null;
         return (
           <div key={cat.id} className="mb-8">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">{cat.name}</p>
+            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-400">{cat.name}</p>
             {catItems.map((d) => (
-              <div key={d.id} className="mb-2 flex items-center gap-3 rounded-lg border border-gray-100 bg-white p-3">
-                {d.image_url && (
-                  <img src={d.image_url} alt="" className="h-10 w-10 rounded object-cover border border-gray-200" />
-                )}
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-800">{d.name}</p>
-                  <p className="text-xs text-gray-400">{d.price.toLocaleString("fr-FR")} F</p>
-                </div>
-                <button type="button" onClick={() => handleToggle(d)}
-                  className={`h-6 w-10 rounded-full transition-colors ${d.available ? "bg-green-500" : "bg-gray-300"}`}>
-                  <span className={`block h-5 w-5 rounded-full bg-white shadow transition-transform ${d.available ? "translate-x-4" : "translate-x-0.5"}`} />
-                </button>
-                <button type="button" onClick={() => {
-                  setEditId(d.id);
-                  setForm({ name: d.name, description: d.description || "", price: String(d.price), category_id: d.category_id || "", image_url: d.image_url || "" });
-                  setImageFile(null);
-                  setAdding(true);
-                }} className="text-gray-400 hover:text-gray-700"><Pencil size={16} strokeWidth={1.5} /></button>
-                {delConfirm === d.id ? (
-                  <span className="flex gap-1">
-                    <button type="button" onClick={() => handleDelete(d.id)} className="text-red-500"><Check size={16} /></button>
-                    <button type="button" onClick={() => setDelConfirm(null)} className="text-gray-400"><X size={16} /></button>
-                  </span>
+              <div key={d.id} className="group mb-3 flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition-all hover:border-gray-200 hover:shadow-md">
+                {d.image_url ? (
+                  <img src={d.image_url} alt="" className="h-16 w-16 rounded-xl object-cover shadow-sm" />
                 ) : (
-                  <button type="button" onClick={() => setDelConfirm(d.id)} className="text-gray-400 hover:text-red-500"><Trash2 size={16} strokeWidth={1.5} /></button>
+                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gray-50 border border-gray-100">
+                    <span className="text-[10px] uppercase tracking-wider text-gray-400 font-medium">Vide</span>
+                  </div>
                 )}
+                <div className="flex-1 min-w-0">
+                  <p className="truncate text-base font-bold text-gray-800">{d.name}</p>
+                  {d.description && <p className="truncate text-xs text-gray-500 mt-0.5">{d.description}</p>}
+                  <p className="mt-1 text-sm font-semibold text-[#1A1208]">{d.price.toLocaleString("fr-FR")} F</p>
+                </div>
+                <div className="flex items-center gap-1 sm:gap-2 pr-1">
+                  <button type="button" onClick={() => handleToggle(d)}
+                    className={`relative h-7 w-12 rounded-full transition-colors ${d.available ? "bg-green-500" : "bg-gray-200"}`}>
+                    <span className={`absolute top-1 left-1 block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${d.available ? "translate-x-5" : "translate-x-0"}`} />
+                  </button>
+                  <div className="mx-1 h-8 w-px bg-gray-100"></div>
+                  <button type="button" onClick={() => {
+                    setEditId(d.id);
+                    setForm({ name: d.name, description: d.description || "", price: String(d.price), category_id: d.category_id || "", image_url: d.image_url || "" });
+                    setImageFile(null);
+                    setAdding(true);
+                  }} className="rounded-lg p-2 text-gray-400 hover:bg-gray-50 hover:text-gray-800 transition-colors"><Pencil size={18} strokeWidth={2} /></button>
+                  {delConfirm === d.id ? (
+                    <span className="flex gap-1 rounded-lg bg-red-50 p-1">
+                      <button type="button" onClick={() => handleDelete(d.id)} className="rounded p-1 text-red-600 hover:bg-red-100 transition-colors"><Check size={16} strokeWidth={2.5} /></button>
+                      <button type="button" onClick={() => setDelConfirm(null)} className="rounded p-1 text-gray-500 hover:bg-gray-200 transition-colors"><X size={16} strokeWidth={2.5} /></button>
+                    </span>
+                  ) : (
+                    <button type="button" onClick={() => setDelConfirm(d.id)} className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"><Trash2 size={18} strokeWidth={2} /></button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         );
       })}
+
+      {filteredItems.length === 0 && search && (
+        <div className="py-12 text-center">
+          <p className="text-gray-500">Aucun plat ne correspond à "{search}"</p>
+        </div>
+      )}
 
       {adding ? (
         <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
@@ -175,12 +214,7 @@ const MenuTab = ({ cats, items, reload }: {
               className="h-10 rounded-lg border border-gray-200 px-6 text-xs font-semibold uppercase text-gray-600">Annuler</button>
           </div>
         </div>
-      ) : (
-        <button type="button" onClick={() => { setForm({ name: "", description: "", price: "", category_id: cats[0]?.id || "", image_url: "" }); setImageFile(null); setAdding(true); }}
-          className="mt-2 flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-800">
-          <Plus size={16} /> Ajouter un plat
-        </button>
-      )}
+      ) : null}
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { MessageCircle, Plus, Minus, X, ShoppingBag, Hash, Trash2, Loader2 } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { MessageCircle, Plus, Minus, X, ShoppingBag, Hash, Trash2, Loader2, Search, Eye } from "lucide-react";
 import { toast } from "sonner";
 import ScrollReveal from "@/components/ScrollReveal";
 import { submitOrder, type OrderItem } from "@/services/ordersService";
@@ -96,6 +96,126 @@ const TableModal = ({ onConfirm }: { onConfirm: (n: string) => void }) => {
         </button>
       </div>
     </div>
+  );
+};
+
+/* ── Product Detail Modal ─────────────────────────────── */
+const ProductDetailModal = ({
+  dish,
+  onClose,
+  onAddToCart,
+}: {
+  dish: Dish;
+  onClose: () => void;
+  onAddToCart: (dish: Dish, qty: number) => void;
+}) => {
+  const [qty, setQty] = useState(1);
+  const backdropRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  const handleAdd = () => {
+    onAddToCart(dish, qty);
+    onClose();
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        ref={backdropRef}
+        className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-sm"
+        style={{ animation: "modal-backdrop-in 0.25s ease both" }}
+        onClick={onClose}
+      />
+      {/* Modal */}
+      <div
+        className="fixed inset-0 z-[91] flex items-center justify-center p-4"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      >
+        <div
+          className="relative w-full max-w-lg overflow-hidden rounded-xl bg-card shadow-2xl"
+          style={{ animation: "modal-content-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both" }}
+        >
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/70 hover:text-white"
+          >
+            <X size={18} />
+          </button>
+
+          {/* Image */}
+          <div className="relative aspect-[16/10] w-full overflow-hidden">
+            <img
+              src={dish.image}
+              alt={dish.name}
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-card to-transparent" />
+          </div>
+
+          {/* Content */}
+          <div className="px-5 pb-5 pt-2 md:px-6 md:pb-6">
+            <h3 className="font-display text-2xl font-light italic text-foreground md:text-3xl">
+              {dish.name}
+            </h3>
+            <span className="mt-1 inline-block font-body text-lg font-bold text-primary">
+              {dish.price}
+            </span>
+
+            {dish.description && (
+              <p className="mt-3 font-body text-sm leading-relaxed text-foreground/70">
+                {dish.description}
+              </p>
+            )}
+
+            {/* Quantity + Add to cart */}
+            <div className="mt-6 flex items-center gap-4">
+              <div className="flex items-center gap-0 rounded-lg border border-border overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  className="flex h-11 w-11 items-center justify-center text-foreground/60 transition-colors hover:bg-primary/10 hover:text-primary"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="flex h-11 w-10 items-center justify-center border-x border-border font-body text-base font-bold text-foreground">
+                  {qty}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setQty((q) => q + 1)}
+                  className="flex h-11 w-11 items-center justify-center text-foreground/60 transition-colors hover:bg-primary/10 hover:text-primary"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAdd}
+                className="cta-text flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary py-3 text-primary-foreground transition-all hover:opacity-90 active:scale-[0.97]"
+              >
+                <ShoppingBag size={18} />
+                Ajouter · {formatPrice(dish.priceNum * qty)}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -222,6 +342,8 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
 
   // Fetch from Supabase
   useEffect(() => {
@@ -258,7 +380,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
   useEffect(() => {
     const handleScroll = () => {
       let currentActiveId = "";
-      const offset = scanMode ? 180 : 240; // Adjust offset based on sticky header heights
+      const offset = scanMode ? 230 : 290; // Adjust offset based on sticky header heights + search bar
 
       for (const cat of menuCategories) {
         const el = document.getElementById(cat.id);
@@ -305,15 +427,15 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
     setShowTableModal(false);
   };
 
-  const addToCart = useCallback((dish: Dish) => {
+  const addToCart = useCallback((dish: Dish, qty: number = 1) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.name === dish.name);
       if (existing) {
-        return prev.map((i) => (i.name === dish.name ? { ...i, qty: i.qty + 1 } : i));
+        return prev.map((i) => (i.name === dish.name ? { ...i, qty: i.qty + qty } : i));
       }
-      return [...prev, { ...dish, qty: 1 }];
+      return [...prev, { ...dish, qty }];
     });
-    toast.success(`${dish.name} ajouté au panier`);
+    toast.success(`${dish.name} ajouté au panier${qty > 1 ? ` (x${qty})` : ""}`);
   }, []);
 
   const updateQty = useCallback((name: string, delta: number) => {
@@ -395,32 +517,60 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         </section>
       </div>
 
-      {/* Fixed category pills */}
+      {/* Fixed header: Search + category pills */}
       {!loading && menuCategories.length > 0 && (
         <div
-          className={`fixed left-0 right-0 ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-sm`}
+          className={`fixed left-0 right-0 ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-md shadow-sm`}
         >
-          <div id="category-pills-container" className="no-scrollbar mx-auto flex max-w-6xl gap-2 overflow-x-auto px-6 py-3">
-            {menuCategories.map((c) => (
-              <button
-                key={c.id}
-                id={`pill-${c.id}`}
-                type="button"
-                onClick={() => scrollToId(c.id)}
-                className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
-                  activeId === c.id
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
+          <div className="mx-auto max-w-6xl px-6 pt-4 pb-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Rechercher un plat, une boisson..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-full border border-border bg-card/50 py-2.5 pl-11 pr-4 font-body text-sm text-foreground outline-none transition-colors focus:border-primary focus:bg-card placeholder:text-muted-foreground"
+              />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              {search && (
+                <button 
+                  onClick={() => setSearch("")} 
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+          <div id="category-pills-container" className="no-scrollbar mx-auto flex max-w-6xl gap-2 overflow-x-auto px-6 py-2 pb-3">
+            {menuCategories.map((c) => {
+              const count = c.dishes.filter(d => 
+                d.name.toLowerCase().includes(search.toLowerCase()) || 
+                d.description.toLowerCase().includes(search.toLowerCase())
+              ).length;
+              if (search && count === 0) return null;
+              
+              return (
+                <button
+                  key={c.id}
+                  id={`pill-${c.id}`}
+                  type="button"
+                  onClick={() => scrollToId(c.id)}
+                  className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
+                    activeId === c.id
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
-      <div className={`mx-auto max-w-6xl px-6 pb-16 md:px-12 ${scanMode ? "pt-[60px]" : "pt-[108px]"}`}>
+      <div className={`mx-auto max-w-6xl px-6 pb-16 md:px-12 ${scanMode ? "pt-[110px]" : "pt-[160px]"}`}>
         {/* Skeleton loading */}
         {loading && (
           <>
@@ -437,17 +587,27 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         )}
 
         {/* Real content */}
-        {!loading && menuCategories.map((cat) => (
-          <section key={cat.id} id={cat.id} className="mb-20 scroll-mt-[140px]">
+        {!loading && menuCategories.map((cat) => {
+          const filteredDishes = cat.dishes.filter(dish => 
+            dish.name.toLowerCase().includes(search.toLowerCase()) || 
+            dish.description.toLowerCase().includes(search.toLowerCase())
+          );
+          if (filteredDishes.length === 0) return null;
+
+          return (
+          <section key={cat.id} id={cat.id} className="mb-20 scroll-mt-[180px]">
             <ScrollReveal>
               <p className="label-text mb-2 text-primary">{cat.label}</p>
               <div className="mb-10 h-[1px] bg-border" />
             </ScrollReveal>
             <div className="grid grid-cols-2 gap-3 md:gap-6 md:grid-cols-3 lg:grid-cols-4">
-              {cat.dishes.map((dish, di) => (
+              {filteredDishes.map((dish, di) => (
                 <ScrollReveal key={`${cat.id}-${dish.name}`} delay={di * 80}>
-                  <article className="group flex h-full flex-col overflow-hidden rounded bg-card shadow-sm">
-                    <div className="overflow-hidden">
+                  <article
+                    className="group flex h-full flex-col overflow-hidden rounded bg-card shadow-sm cursor-pointer transition-shadow hover:shadow-md hover:shadow-primary/5"
+                    onClick={() => setSelectedDish(dish)}
+                  >
+                    <div className="relative overflow-hidden">
                       <img
                         src={dish.image}
                         alt=""
@@ -455,16 +615,32 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
                         className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
                       />
+                      {/* Hover overlay hint */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/30">
+                        <span className="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 font-body text-xs font-semibold text-[#1A1208] opacity-0 transition-all duration-300 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
+                          <Eye size={14} />
+                          Voir détails
+                        </span>
+                      </div>
                     </div>
                     <div className="flex flex-1 flex-col p-3 md:p-5">
                       <h3 className="font-display text-[15px] leading-tight text-foreground md:text-xl lg:text-2xl">{dish.name}</h3>
                       <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-foreground/60 md:text-sm">{dish.description}</p>
+                      {dish.description && dish.description.length > 60 && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setSelectedDish(dish); }}
+                          className="mt-1 self-start font-body text-[11px] font-medium text-primary hover:underline md:text-xs"
+                        >
+                          Voir plus →
+                        </button>
+                      )}
                       
                       <div className="mt-auto pt-4 flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
                         <span className="font-body text-sm font-bold text-primary md:text-base">{dish.price}</span>
                         <button
                           type="button"
-                          onClick={() => addToCart(dish)}
+                          onClick={(e) => { e.stopPropagation(); addToCart(dish); }}
                           className="cta-text flex w-full items-center justify-center gap-1 rounded-full border border-primary px-3 py-1.5 text-[11px] text-primary transition-colors hover:bg-primary hover:text-primary-foreground xl:w-auto md:text-[12px]"
                         >
                           <Plus size={14} />
@@ -477,7 +653,20 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
               ))}
             </div>
           </section>
-        ))}
+        )})}
+
+        {/* Search Empty state */}
+        {!loading && search && menuCategories.every(cat => 
+          cat.dishes.filter(dish => 
+            dish.name.toLowerCase().includes(search.toLowerCase()) || 
+            dish.description.toLowerCase().includes(search.toLowerCase())
+          ).length === 0
+        ) && (
+          <div className="py-20 text-center">
+            <Search className="mx-auto mb-4 text-muted-foreground opacity-50" size={48} />
+            <p className="text-lg text-foreground/60">Aucun plat ne correspond à "{search}"</p>
+          </div>
+        )}
 
         {/* Empty state */}
         {!loading && menuCategories.length === 0 && (
@@ -532,6 +721,14 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
           onSubmit={handleSubmitOrder}
           onWhatsAppOrder={handleWhatsAppOrder}
           submitting={submitting}
+        />
+      )}
+
+      {selectedDish && (
+        <ProductDetailModal
+          dish={selectedDish}
+          onClose={() => setSelectedDish(null)}
+          onAddToCart={addToCart}
         />
       )}
     </main>
