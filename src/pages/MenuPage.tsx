@@ -377,32 +377,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
     load();
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      let currentActiveId = "";
-      const offset = scanMode ? 230 : 290; // Adjust offset based on sticky header heights + search bar
-
-      for (const cat of menuCategories) {
-        const el = document.getElementById(cat.id);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= offset) {
-            currentActiveId = cat.id;
-          }
-        }
-      }
-
-      if (currentActiveId) {
-        setActiveId(currentActiveId);
-      } else if (menuCategories.length > 0) {
-        setActiveId(menuCategories[0].id);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [menuCategories, scanMode]);
+  // Removed scroll listener to improve performance using a Tabbed View.
 
   // Scroll active pill into view
   useEffect(() => {
@@ -416,9 +391,11 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
     }
   }, [activeId]);
 
-  const scrollToId = (id: string) => {
+  const handleTabClick = (id: string) => {
+    setSearch("");
     setActiveId(id);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const offset = scanMode ? 110 : 160;
+    window.scrollTo({ top: offset, behavior: "smooth" });
   };
 
   const handleTableConfirm = (n: string) => {
@@ -555,7 +532,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
                   key={c.id}
                   id={`pill-${c.id}`}
                   type="button"
-                  onClick={() => scrollToId(c.id)}
+                  onClick={() => handleTabClick(c.id)}
                   className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
                     activeId === c.id
                       ? "bg-primary text-primary-foreground"
@@ -588,6 +565,9 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
 
         {/* Real content */}
         {!loading && menuCategories.map((cat) => {
+          // In tabbed view, only render the active category unless searching
+          if (!search && cat.id !== activeId) return null;
+
           const filteredDishes = cat.dishes.filter(dish => 
             dish.name.toLowerCase().includes(search.toLowerCase()) || 
             dish.description.toLowerCase().includes(search.toLowerCase())
