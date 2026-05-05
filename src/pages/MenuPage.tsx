@@ -4,26 +4,9 @@ import { toast } from "sonner";
 import ScrollReveal from "@/components/ScrollReveal";
 import { submitOrder, type OrderItem } from "@/services/ordersService";
 import { getAvailableItems, getCategories, type MenuItem, type Category } from "@/services/restaurantService";
-import entreeImg from "@/assets/entree.jpg";
-import platPrincipal from "@/assets/plat-principal.jpg";
-import fruitsDeMer from "@/assets/fruits-de-mer.jpg";
-import dessertImg from "@/assets/dessert.jpg";
-import cocktailImg from "@/assets/cocktail.jpg";
 import { useSettings } from "@/contexts/SettingsContext";
 
-// Fallback images by category name keyword
-function getFallbackImage(catName: string | null | undefined): string {
-  if (!catName) return entreeImg;
-  const lower = catName.toLowerCase();
-  if (lower.includes("entrée") || lower.includes("entree")) return entreeImg;
-  if (lower.includes("plat")) return platPrincipal;
-  if (lower.includes("fruit") || lower.includes("mer")) return fruitsDeMer;
-  if (lower.includes("dessert")) return dessertImg;
-  if (lower.includes("cocktail") || lower.includes("boisson")) return cocktailImg;
-  return entreeImg;
-}
-
-type Dish = { id: string; name: string; description: string; price: string; image: string; priceNum: number };
+type Dish = { id: string; name: string; description: string; price: string; image: string | null; priceNum: number };
 type MenuCategory = { id: string; label: string; dishes: Dish[] };
 
 interface CartItem extends Dish {
@@ -157,17 +140,19 @@ const ProductDetailModal = ({
           </button>
 
           {/* Image */}
-          <div className="relative aspect-[16/10] w-full overflow-hidden">
-            <img
-              src={dish.image}
-              alt={dish.name}
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-card to-transparent" />
-          </div>
+          {dish.image && (
+            <div className="relative aspect-[16/10] w-full overflow-hidden">
+              <img
+                src={dish.image}
+                alt={dish.name}
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-card to-transparent" />
+            </div>
+          )}
 
           {/* Content */}
-          <div className="px-5 pb-5 pt-2 md:px-6 md:pb-6">
+          <div className={`px-5 pb-5 ${dish.image ? 'pt-2' : 'pt-6'} md:px-6 md:pb-6`}>
             <h3 className="font-display text-2xl font-light italic text-foreground md:text-3xl">
               {dish.name}
             </h3>
@@ -361,7 +346,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
               description: item.description || "",
               price: formatPrice(item.price),
               priceNum: item.price,
-              image: item.image_url || getFallbackImage(cat.name),
+              image: item.image_url || null,
             })),
         })).filter((cat: MenuCategory) => cat.dishes.length > 0);
 
@@ -605,22 +590,24 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
                     className="group flex h-full flex-col overflow-hidden rounded bg-card shadow-sm cursor-pointer transition-shadow hover:shadow-md hover:shadow-primary/5"
                     onClick={() => setSelectedDish(dish)}
                   >
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={dish.image}
-                        alt=""
-                        loading="lazy"
-                        className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                        style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
-                      />
-                      {/* Hover overlay hint */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/30">
-                        <span className="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 font-body text-xs font-semibold text-[#1A1208] opacity-0 transition-all duration-300 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-                          <Eye size={14} />
-                          Voir détails
-                        </span>
+                    {dish.image && (
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={dish.image}
+                          alt=""
+                          loading="lazy"
+                          className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                          style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
+                        />
+                        {/* Hover overlay hint */}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/30">
+                          <span className="flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 font-body text-xs font-semibold text-[#1A1208] opacity-0 transition-all duration-300 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
+                            <Eye size={14} />
+                            Voir détails
+                          </span>
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div className="flex flex-1 flex-col p-3 md:p-5">
                       <h3 className="font-display text-[15px] leading-tight text-foreground md:text-xl lg:text-2xl">{dish.name}</h3>
                       <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-foreground/60 md:text-sm">{dish.description}</p>
