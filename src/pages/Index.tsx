@@ -2,10 +2,8 @@ import { Link } from "react-router-dom";
 import { MessageCircle, Star, UtensilsCrossed, Wine } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 import heroHome from "@/assets/hero-home.jpg";
-import interieur from "@/assets/interieur.jpg";
-import terrasse from "@/assets/terrasse.jpg";
-import cocktail from "@/assets/cocktail.jpg";
-import amisDiner from "@/assets/amis-diner.jpg";
+import ambiance1 from "@/assets/img/ambiance1.jpg";
+import Carousel from "@/components/Carousel";
 import { useSettings } from "@/contexts/SettingsContext";
 
 const Index = () => {
@@ -52,7 +50,7 @@ const Index = () => {
             </p>
           </ScrollReveal>
           <ScrollReveal delay={100} className="w-full">
-            <img src={interieur} alt="" loading="lazy" className="aspect-[4/5] w-full rounded object-cover" />
+            <img src={ambiance1} alt="" loading="lazy" className="aspect-[4/5] w-full rounded object-cover" />
           </ScrollReveal>
         </div>
       </section>
@@ -72,37 +70,9 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-24 md:px-12 md:py-32">
-        <h2 className="font-display mb-16 text-center text-4xl font-light text-foreground md:text-[56px]">L&apos;ambiance</h2>
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-          <ScrollReveal className="col-span-2 row-span-2 h-full min-h-[200px] md:min-h-[320px]">
-            <img
-              src={terrasse}
-              alt=""
-              loading="lazy"
-              className="h-full w-full rounded object-cover transition-transform duration-500 hover:scale-[1.03]"
-              style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
-            />
-          </ScrollReveal>
-          <ScrollReveal delay={80}>
-            <img
-              src={cocktail}
-              alt=""
-              loading="lazy"
-              className="aspect-square w-full rounded object-cover transition-transform duration-500 hover:scale-[1.03]"
-              style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
-            />
-          </ScrollReveal>
-          <ScrollReveal delay={160}>
-            <img
-              src={amisDiner}
-              alt=""
-              loading="lazy"
-              className="aspect-square w-full rounded object-cover transition-transform duration-500 hover:scale-[1.03]"
-              style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
-            />
-          </ScrollReveal>
-        </div>
+      <section className="mx-auto max-w-screen-2xl py-24 md:py-32">
+        <h2 className="font-display mb-12 text-center text-4xl font-light text-foreground md:text-[56px]">L&apos;ambiance</h2>
+        <Carousel />
       </section>
 
       <section className="bg-primary py-20">

@@ -232,7 +232,7 @@ const CuisinePage = () => {
           if (order) {
             setPreparing((pr) => {
               if (pr.some(x => x.id === id)) return pr;
-              return [...pr, { ...order, status: "preparing" }];
+              return [...pr, { ...order, status: "preparing" as OrderStatus }];
             });
           }
           return p.filter((o) => o.id !== id);
@@ -244,7 +244,7 @@ const CuisinePage = () => {
           if (order) {
             setDone((d) => {
               if (d.some(x => x.id === id)) return d;
-              return [{ ...order, status: "done" }, ...d].slice(0, 10);
+              return [{ ...order, status: "done" as OrderStatus }, ...d].slice(0, 10);
             });
           }
           return p.filter((o) => o.id !== id);

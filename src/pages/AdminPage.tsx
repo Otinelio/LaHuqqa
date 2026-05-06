@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   LogOut, Pencil, Trash2, Check, X, ChevronUp, ChevronDown,
-  Plus, Save, Clock, Hash, Loader2, Search, UtensilsCrossed, ImageIcon,
+  Plus, Save, Clock, Hash, Loader2, Search, UtensilsCrossed, ImageIcon, RotateCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -11,7 +11,7 @@ import {
 import {
   getSettings, updateSettings as saveSettings,
   getCategories, addCategory, updateCategory, deleteCategory, reorderCategories,
-  getMenuItems, addMenuItem, updateMenuItem, deleteMenuItem, toggleAvailable, uploadImage,
+  getMenuItems, addMenuItem, updateMenuItem, deleteMenuItem, toggleAvailable, uploadImage, rotateImage,
   type RestaurantSettings, type Category, type MenuItem,
 } from "@/services/restaurantService";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -111,6 +111,20 @@ const MenuTab = ({ cats, items, reload }: {
     catch { toast.error("Erreur de suppression"); }
   };
 
+  const handleRotate = async (item: MenuItem) => {
+    if (!item.image_url) return;
+    const toastId = toast.loading("Rotation de l'image en cours...");
+    try {
+      const newUrl = await rotateImage(item.image_url);
+      await updateMenuItem(item.id, { image_url: newUrl });
+      toast.success("Image pivotée avec succès !", { id: toastId });
+      reload();
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur lors de la rotation", { id: toastId });
+    }
+  };
+
   const filteredItems = items.filter(item =>
     item.name.toLowerCase().includes(search.toLowerCase()) ||
     (item.description && item.description.toLowerCase().includes(search.toLowerCase()))
@@ -172,7 +186,17 @@ const MenuTab = ({ cats, items, reload }: {
                 <div key={d.id} className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-all hover:border-gray-200 hover:shadow-md">
                   <div className="flex items-start gap-3 mb-3">
                     {d.image_url ? (
-                      <img src={d.image_url} alt="" className="h-12 w-12 rounded-xl object-cover shadow-sm flex-shrink-0" />
+                      <div className="group relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gray-100 overflow-hidden shadow-sm">
+                        <img src={d.image_url} alt="" className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRotate(d)}
+                          className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100 text-white"
+                          title="Pivoter l'image à 90°"
+                        >
+                          <RotateCw size={16} />
+                        </button>
+                      </div>
                     ) : (
                       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F8F3ED] flex-shrink-0">
                         <UtensilsCrossed size={20} className="text-[#C8860A]" />
@@ -421,7 +445,7 @@ const OrdersTab = () => {
         if (order) {
           setPreparing((p) => {
             if (p.some(x => x.id === id)) return p;
-            return [...p, { ...order, status: "preparing" }];
+            return [...p, { ...order, status: "preparing" as OrderStatus }];
           });
         }
       }
@@ -431,7 +455,7 @@ const OrdersTab = () => {
         if (order) {
           setDone((p) => {
             if (p.some(x => x.id === id)) return p;
-            return [{ ...order, status: "done" }, ...p].slice(0, 10);
+            return [{ ...order, status: "done" as OrderStatus }, ...p].slice(0, 10);
           });
         }
       }

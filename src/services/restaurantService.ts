@@ -219,3 +219,31 @@ export async function uploadImage(file: File): Promise<string> {
 
   return data.publicUrl;
 }
+
+export async function rotateImage(url: string): Promise<string> {
+  const res = await fetch(url);
+  const blob = await res.blob();
+  const bitmap = await createImageBitmap(blob);
+
+  const canvas = document.createElement("canvas");
+  // Rotate 90 degrees clockwise
+  canvas.width = bitmap.height;
+  canvas.height = bitmap.width;
+  
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not get canvas context");
+  
+  ctx.translate(canvas.width, 0);
+  ctx.rotate((90 * Math.PI) / 180);
+  ctx.drawImage(bitmap, 0, 0);
+
+  const newBlob = await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((b) => {
+      if (b) resolve(b);
+      else reject(new Error("Canvas toBlob failed"));
+    }, "image/webp", 1.0);
+  });
+
+  const file = new File([newBlob], "rotated.webp", { type: "image/webp" });
+  return uploadImage(file);
+}
