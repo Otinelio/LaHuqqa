@@ -34,12 +34,12 @@ const AmbiancePage = () => {
       </div>
 
       <section className="bg-secondary py-20">
-        <ScrollReveal className="mx-auto max-w-[720px] px-6">
+        <ScrollReveal className="mx-auto max-w-[720px] px-6 text-center">
           <p className="font-display text-xl font-light italic leading-[1.7] text-foreground md:text-[22px]">
-            Pousser la porte de {name}, c&apos;est entrer dans un monde à part. Un lieu où le temps ralentit, où la lumière dorée des bougies dessine des ombres douces sur les tables en bois, où chaque détail — du verre posé devant vous au murmure de la musique — a été pensé pour créer un instant de grâce.
+            Chez {name}, notre vision est simple : créer un restaurant unique où vous vous sentez chez vous, entourés de confort et de convivialité. Chaque détail est pensé pour que votre visite ressemble à un retour à la maison.
           </p>
           <p className="font-display mt-8 text-xl font-light italic leading-[1.7] text-foreground md:text-[22px]">
-            Dehors, la terrasse respire sous les étoiles de Lomé. Les plantes tropicales entourent l&apos;espace comme un jardin secret, et les guirlandes lumineuses transforment chaque soirée en fête. Ici, on vient seul·e, entre amis ou en famille — et on repart toujours avec le sourire.
+            Ici, les saveurs variées du monde se retrouvent sous un même toit. Nous vous invitons à savourer l&apos;essence de chaque culture à travers l&apos;art du goût, dans un cadre qui allie authenticité et passion.
           </p>
         </ScrollReveal>
       </section>
@@ -55,7 +55,7 @@ const AmbiancePage = () => {
         <div className="absolute inset-0 bg-background/70" />
         <ScrollReveal className="relative z-10 max-w-3xl px-6 text-center">
           <p className="font-display text-3xl font-light italic text-foreground md:text-5xl">
-            Que vous soyez seul·e, entre amis ou en famille.
+            Où chaque repas est un voyage, et chaque visite un retour à la maison.
           </p>
         </ScrollReveal>
       </section>

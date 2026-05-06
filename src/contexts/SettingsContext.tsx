@@ -4,7 +4,7 @@ import { getSettings, type RestaurantSettings } from "@/services/restaurantServi
 const defaultSettings: RestaurantSettings = {
   id: "",
   name: "La HuQQa",
-  tagline: "Une expérience au goût unique.",
+  tagline: "Un voyage de goût et de tradition",
   whatsapp: "22896949494",
   address: "Bd. de la Kara, Tokoin Wuiti, Lomé, Togo",
   hours: "Lundi–Dimanche · 11h30 – 00h00",

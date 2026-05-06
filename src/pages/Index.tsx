@@ -23,7 +23,7 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 to-background/85" />
         <div className="relative z-10 max-w-4xl px-6 text-center">
           <h1 className="font-display text-5xl font-light italic leading-[1.05] text-foreground md:text-[88px]">
-            {tagline}
+            Un voyage de goût et de tradition
           </h1>
           <p className="font-body mt-6 text-base text-foreground/80">{address}</p>
           <Link
@@ -38,15 +38,15 @@ const Index = () => {
       <section className="mx-auto max-w-6xl px-6 py-24 md:px-12 md:py-32">
         <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-20">
           <ScrollReveal>
-            <p className="label-text mb-6 text-primary">L&apos;esprit du lieu</p>
+            <p className="label-text mb-6 text-primary">Notre Histoire</p>
             <p className="mb-5 text-base leading-[1.7] text-foreground/80">
-              {name} est née d&apos;une envie simple : créer un espace où l&apos;on se sent bien. Un lieu où la cuisine locale togolaise rencontre les saveurs internationales, où chaque plat est une invitation au voyage, et où le cadre transforme un repas en un moment précieux.
+              {name} est née d&apos;une idée partagée par deux frères. Leur vision était simple mais ambitieuse : créer un restaurant unique où les clients se sentent chez eux, entourés de confort et de convivialité, tout en se régalant des meilleurs délices culinaires.
             </p>
             <p className="mb-5 text-base leading-[1.7] text-foreground/80">
-              Des cocktails construits avec soin, une terrasse baignée de lumières dorées, un intérieur feutré qui invite à la conversation — ici, tout est pensé pour que l&apos;instant dure. Que vous soyez en tête-à-tête ou entre amis, {name} s&apos;adapte.
+              Nous croyons que les saveurs variées du monde méritent de se retrouver sous un même toit. Notre restaurant est né d&apos;une passion pour la cuisine mondiale et d&apos;un dévouement à vous offrir les meilleures expériences culinaires de chaque coin du monde.
             </p>
             <p className="text-base leading-[1.7] text-foreground/80">
-              C&apos;est aussi le lieu de vos événements : anniversaires, réceptions privées, soirées d&apos;entreprise. Chaque occasion trouve son écrin au cœur de {address}.
+              Avec une attention méticuleuse aux détails et un engagement envers l&apos;authenticité, nous vous invitons à savourer l&apos;essence de chaque culture à travers l&apos;art du goût. Chaque plat est un témoignage de cette mission.
             </p>
           </ScrollReveal>
           <ScrollReveal delay={100} className="w-full">
@@ -58,15 +58,33 @@ const Index = () => {
       <section className="bg-secondary py-20">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-6 md:grid-cols-3 md:px-12">
           {[
-            { Icon: UtensilsCrossed, label: "Cuisine locale & internationale" },
-            { Icon: Wine, label: "Cocktails & boissons artisanaux" },
-            { Icon: Star, label: "Cadre chic & convivial" },
+            { Icon: UtensilsCrossed, label: "Cuisine mondiale & authentique" },
+            { Icon: Wine, label: "Portions généreuses & ingrédients frais" },
+            { Icon: Star, label: "Expérience culinaire exceptionnelle" },
           ].map(({ Icon, label }, i) => (
             <ScrollReveal key={label} delay={i * 80} className="py-8 text-center">
               <Icon className="mx-auto mb-4 size-8 text-primary" strokeWidth={1.5} />
               <p className="font-display text-xl text-foreground">{label}</p>
             </ScrollReveal>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-6 py-24 md:px-12">
+        <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-20">
+          <ScrollReveal order={1} className="order-2 md:order-1">
+            <img src={ambiance1} alt="L'équipe" loading="lazy" className="aspect-[4/3] w-full rounded object-cover shadow-2xl" />
+          </ScrollReveal>
+          <ScrollReveal order={2} className="order-1 md:order-2">
+            <p className="label-text mb-6 text-primary">L&apos;Équipe & Le Chef</p>
+            <h2 className="font-display mb-6 text-4xl font-light text-foreground">Une passion partagée</h2>
+            <p className="mb-5 text-base leading-[1.7] text-foreground/80">
+              Notre succès est dû à notre équipe adorable, qui apporte chaleur et dévouement dans tout ce qu&apos;elle fait. Des visages amicaux qui vous accueillent à la porte aux mains expertes qui préparent vos repas, chaque membre est engagé à votre satisfaction.
+            </p>
+            <p className="text-base leading-[1.7] text-foreground/80">
+              Un merci spécial à notre chef talentueux, fort de nombreuses années d&apos;expérience. Sa créativité et son dévouement se traduisent par de magnifiques présentations qui ravissent autant les yeux que le palais.
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
