@@ -8,6 +8,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import ScrollToTop from "@/components/ScrollToTop";
 import Index from "@/pages/Index";
 import MenuPage from "@/pages/MenuPage";
 import AmbiancePage from "@/pages/AmbiancePage";
@@ -44,6 +45,7 @@ const App = () => {
           <Toaster />
           {loading && <LoadingScreen onComplete={handle} />}
           <BrowserRouter>
+            <ScrollToTop />
             <PublicChrome>
               <Routes>
                 <Route path="/" element={<Index />} />

@@ -132,46 +132,49 @@ const MenuTab = ({ cats, items, reload }: {
 
   return (
     <div>
-      <div className="mb-6 flex gap-4">
-        <div className="relative flex-1">
-          <input type="text" placeholder="Rechercher un plat par nom ou description..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="h-12 w-full rounded-xl border border-gray-200 pl-11 pr-4 text-sm text-gray-900 bg-white outline-none focus:border-gray-400 focus:ring-4 focus:ring-gray-100 transition-all shadow-sm" />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-        </div>
-        <button type="button" onClick={openAdd}
-          className="flex items-center gap-2 rounded-xl bg-[#1A1208] px-5 text-sm font-semibold uppercase tracking-wider text-white hover:bg-black transition-colors shadow-sm">
-          <Plus size={18} /> Ajouter un plat
-        </button>
-      </div>
-
-      {/* Categories Pills */}
-      {!search && cats.length > 0 && (
-        <div className="mb-6 flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-          <button
-            onClick={() => setActiveCatId("all")}
-            className={`whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold transition-all ${
-              activeCatId === "all"
-                ? "bg-[#1A1208] text-white"
-                : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"
-            }`}
-          >
-            Tout
+      {/* Sticky search + categories bar */}
+      <div className="sticky top-[45px] z-10 -mx-4 md:-mx-8 px-4 md:px-8 bg-[#F8F9FA] pb-2 pt-2 border-b border-gray-100">
+        <div className="mb-3 flex gap-4">
+          <div className="relative flex-1">
+            <input type="text" placeholder="Rechercher un plat par nom ou description..." value={search} onChange={(e) => setSearch(e.target.value)}
+              className="h-12 w-full rounded-xl border border-gray-200 pl-11 pr-4 text-sm text-gray-900 bg-white outline-none focus:border-gray-400 focus:ring-4 focus:ring-gray-100 transition-all shadow-sm" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          </div>
+          <button type="button" onClick={openAdd}
+            className="flex items-center gap-2 rounded-xl bg-[#1A1208] px-5 text-sm font-semibold uppercase tracking-wider text-white hover:bg-black transition-colors shadow-sm">
+            <Plus size={18} /> Ajouter un plat
           </button>
-          {cats.map((c) => (
+        </div>
+
+        {/* Categories Pills */}
+        {!search && cats.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
             <button
-              key={c.id}
-              onClick={() => setActiveCatId(c.id)}
+              onClick={() => setActiveCatId("all")}
               className={`whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold transition-all ${
-                activeCatId === c.id
+                activeCatId === "all"
                   ? "bg-[#1A1208] text-white"
                   : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"
               }`}
             >
-              {c.name}
+              Tout
             </button>
-          ))}
-        </div>
-      )}
+            {cats.map((c) => (
+              <button
+                key={c.id}
+                onClick={() => setActiveCatId(c.id)}
+                className={`whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold transition-all ${
+                  activeCatId === c.id
+                    ? "bg-[#1A1208] text-white"
+                    : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {cats.map((cat) => {
         if (!search && activeCatId !== "all" && cat.id !== activeCatId) return null;
@@ -600,13 +603,13 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]" style={{ fontFamily: "DM Sans, sans-serif" }}>
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-8">
+      <header className="flex h-14 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-8">
         <h1 className="text-base font-bold text-gray-800">{name} · Admin</h1>
         <button type="button" onClick={logout} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800">
           <LogOut size={16} strokeWidth={1.5} />Déconnexion
         </button>
       </header>
-      <div className="sticky top-14 z-20 border-b border-gray-200 bg-white">
+      <div className="sticky top-0 z-20 border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-5xl gap-1 px-4 md:px-8">
           {tabs.map((t) => (
             <button key={t.id} type="button" onClick={() => setTab(t.id)}

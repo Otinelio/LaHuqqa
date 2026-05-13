@@ -328,6 +328,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
 
   // Fetch from Supabase
@@ -468,7 +469,7 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
   const cartTotal = cart.reduce((s, i) => s + i.priceNum * i.qty, 0);
 
   return (
-    <main className="overflow-x-hidden">
+    <main style={{ overflowX: "clip" }}>
       {scanMode && showTableModal && <TableModal onConfirm={handleTableConfirm} />}
       {scanMode && tableNumber && (
         <div className="fixed right-4 top-4 z-40 rounded-full bg-primary/90 px-4 py-1.5 font-body text-sm font-semibold text-primary-foreground">
@@ -484,68 +485,107 @@ const MenuPage = ({ scanMode = false }: MenuPageProps) => {
         </section>
       </div>
 
-      {/* Fixed header: Search + category pills */}
+      {/* Fixed header: Category pills + expandable search icon */}
       {!loading && menuCategories.length > 0 && (
         <div
           id="menu-sticky-header"
           className={`sticky ${scanMode ? "top-0" : "top-[72px]"} z-40 border-b border-border bg-background/95 backdrop-blur-md shadow-sm`}
         >
-          <div className="mx-auto max-w-6xl px-6 pt-4 pb-2">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Rechercher un plat, une boisson..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-full border border-border bg-card/50 py-2.5 pl-11 pr-4 font-body text-sm text-foreground outline-none transition-colors focus:border-primary focus:bg-card placeholder:text-muted-foreground"
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-              {search && (
-                <button 
-                  onClick={() => setSearch("")} 
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          {/* Expanded search bar */}
+          <div
+            className="overflow-hidden transition-all duration-300 ease-out"
+            style={{
+              maxHeight: searchOpen ? "80px" : "0px",
+              opacity: searchOpen ? 1 : 0,
+            }}
+          >
+            <div className="mx-auto max-w-6xl px-6 pt-3 pb-1">
+              <div className="relative">
+                <input
+                  id="menu-search-input"
+                  type="text"
+                  placeholder="Rechercher un plat, une boisson..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full rounded-full border border-border bg-card/50 py-2.5 pl-11 pr-10 font-body text-sm text-foreground outline-none transition-colors focus:border-primary focus:bg-card placeholder:text-muted-foreground"
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                <button
+                  onClick={() => {
+                    setSearch("");
+                    setSearchOpen(false);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-primary/10 hover:text-foreground"
                 >
                   <X size={16} />
                 </button>
-              )}
+              </div>
             </div>
           </div>
-          <div id="category-pills-container" className="no-scrollbar mx-auto flex max-w-6xl gap-2 overflow-x-auto px-6 py-2 pb-3">
+
+          {/* Category pills row with search icon */}
+          <div className="mx-auto flex max-w-6xl items-center gap-2 px-6 py-2 pb-3">
+            <div id="category-pills-container" className="no-scrollbar flex flex-1 gap-2 overflow-x-auto">
+              <button
+                id={`pill-all`}
+                type="button"
+                onClick={() => handleTabClick("all")}
+                className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
+                  activeId === "all"
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
+                }`}
+              >
+                Tout
+              </button>
+              {menuCategories.map((c) => {
+                const count = c.dishes.filter(d =>
+                  d.name.toLowerCase().includes(search.toLowerCase()) ||
+                  d.description.toLowerCase().includes(search.toLowerCase())
+                ).length;
+                if (search && count === 0) return null;
+
+                return (
+                  <button
+                    key={c.id}
+                    id={`pill-${c.id}`}
+                    type="button"
+                    onClick={() => handleTabClick(c.id)}
+                    className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
+                      activeId === c.id
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Search toggle icon */}
             <button
-              id={`pill-all`}
               type="button"
-              onClick={() => handleTabClick("all")}
-              className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
-                activeId === "all"
+              onClick={() => {
+                const next = !searchOpen;
+                setSearchOpen(next);
+                if (next) {
+                  setTimeout(() => {
+                    document.getElementById("menu-search-input")?.focus();
+                  }, 150);
+                } else {
+                  setSearch("");
+                }
+              }}
+              className={`ml-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
+                searchOpen
                   ? "bg-primary text-primary-foreground"
-                  : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
+                  : "border border-border text-foreground/60 hover:border-primary hover:text-primary"
               }`}
+              aria-label="Rechercher"
             >
-              Tout
+              <Search size={16} />
             </button>
-            {menuCategories.map((c) => {
-              const count = c.dishes.filter(d => 
-                d.name.toLowerCase().includes(search.toLowerCase()) || 
-                d.description.toLowerCase().includes(search.toLowerCase())
-              ).length;
-              if (search && count === 0) return null;
-              
-              return (
-                <button
-                  key={c.id}
-                  id={`pill-${c.id}`}
-                  type="button"
-                  onClick={() => handleTabClick(c.id)}
-                  className={`cta-text whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-all duration-150 ${
-                    activeId === c.id
-                      ? "bg-primary text-primary-foreground"
-                      : "border border-border text-foreground/70 hover:border-primary hover:text-primary"
-                  }`}
-                >
-                  {c.label}
-                </button>
-              );
-            })}
           </div>
         </div>
       )}
