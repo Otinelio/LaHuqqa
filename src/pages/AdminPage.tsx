@@ -281,17 +281,29 @@ const MenuTab = ({ cats, items, reload }: {
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Image du plat</label>
                     <div className="flex items-center gap-3">
                       {(imageFile || form.image_url) ? (
-                        <img src={imageFile ? URL.createObjectURL(imageFile) : form.image_url} alt="Aperçu" className="h-14 w-14 rounded-xl object-cover border border-gray-200" />
+                        <div className="relative group h-14 w-14 flex-shrink-0">
+                          <img src={imageFile ? URL.createObjectURL(imageFile) : form.image_url} alt="Aperçu" className="h-full w-full rounded-xl object-cover border border-gray-200" />
+                          <button
+                            type="button"
+                            onClick={() => { setImageFile(null); setForm({ ...form, image_url: "" }); }}
+                            className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-100 text-red-600 shadow-sm transition-transform hover:scale-110"
+                            title="Supprimer l'image"
+                          >
+                            <X size={12} strokeWidth={3} />
+                          </button>
+                        </div>
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gray-50 border border-dashed border-gray-200">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gray-50 border border-dashed border-gray-200 flex-shrink-0">
                           <ImageIcon size={20} className="text-gray-300" />
                         </div>
                       )}
-                      <label className="cursor-pointer rounded-lg border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-                        Choisir une image
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setImageFile(e.target.files[0]); }} />
-                      </label>
-                      <span className="text-[10px] text-gray-400">PNG, JPG ou WEBP. Max 2Mo.</span>
+                      <div className="flex flex-col gap-1">
+                        <label className="cursor-pointer self-start rounded-lg border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                          Choisir une image
+                          <input type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setImageFile(e.target.files[0]); }} />
+                        </label>
+                        <span className="text-[10px] text-gray-400">PNG, JPG ou WEBP. Max 2Mo.</span>
+                      </div>
                     </div>
                   </div>
                 </div>
